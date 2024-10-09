@@ -572,6 +572,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                     },
                     runnerUi: !process.env.CI,
                   });
+                  log.info(`Cypress run finished here............`);
                   if ((result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     failedSpecFilePaths.push(filePath);
                   }
@@ -582,6 +583,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                   // False positive
                   // eslint-disable-next-line require-atomic-updates
                   result = error;
+                  log.info(`Something went really wrong with the cypress execution: ${error}`);
                   failedSpecFilePaths.push(filePath);
                 }
               }
