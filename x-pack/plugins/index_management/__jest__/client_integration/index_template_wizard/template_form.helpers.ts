@@ -300,6 +300,23 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     testBed.find('previewIndexTemplate').simulate('click');
   };
 
+  const fillNameStepOne = async (name?: string) => {
+    const { find, component } = testBed;
+    if (name) {
+      act(() => {
+        find('nameField.input').simulate('change', { target: { value: name, name } });
+        jest.advanceTimersByTime(0);
+      });
+    }
+    component.update();
+
+    await act(async () => {
+      clickNextButton();
+    });
+
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
@@ -315,6 +332,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       completeStepFour,
       completeStepFive,
       componentTemplates,
+      fillNameStepOne,
       mappings,
       review,
       previewTemplate,
@@ -375,6 +393,7 @@ export type TestSubjects =
   | 'systemTemplateEditCallout'
   | 'stepComponents'
   | 'stepAliases'
+  | 'stepLogistics'
   | 'stepMappings'
   | 'stepSettings'
   | 'stepSummary'

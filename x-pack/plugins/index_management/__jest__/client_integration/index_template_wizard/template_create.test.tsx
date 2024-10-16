@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, INVALID_TEMPLATE_NAME_CHARS } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
 import {
@@ -166,6 +166,34 @@ describe('<TemplateCreate />', () => {
         testBed = await setup(httpSetup);
       });
       testBed.component.update();
+    });
+
+    describe('logistics (step 1)', () => {
+      it('should set the correct page title', async () => {
+        const { exists, find } = testBed;
+
+        expect(exists('stepLogistics')).toBe(true);
+        expect(find('stepTitle').text()).toEqual('Logistics');
+      });
+
+      it('should not allow empty name', async () => {
+        const { form, actions } = testBed;
+
+        await actions.fillNameStepOne('');
+
+        expect(form.getErrorsMessages()).toContain('A template name is required.');
+      });
+
+      INVALID_TEMPLATE_NAME_CHARS.forEach((char) => {
+        it(`should not allow ${char} in name`, async () => {
+          const { form, actions } = testBed;
+
+          await actions.fillNameStepOne(`invalidChar${char}`);
+          expect(form.getErrorsMessages()).toContain(
+            `A template name must not contain the character "${char}"`
+          );
+        });
+      });
     });
 
     describe('component templates (step 2)', () => {
