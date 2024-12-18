@@ -134,6 +134,7 @@ function getFieldsMeta(esDocsBase: string) {
         {
           value: LOGSDB_INDEX_MODE,
           inputDisplay: indexModeLabels[LOGSDB_INDEX_MODE],
+          'data-test-subj': 'index_mode_logsdb',
           dropdownDisplay: (
             <Fragment>
               <strong>{indexModeLabels[LOGSDB_INDEX_MODE]}</strong>

@@ -113,6 +113,30 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    it('can create a data stream with logsdb index mode', async () => {
+      // Click Create Template button
+      await testSubjects.click('createTemplateButton');
+      const pageTitleText = await testSubjects.getVisibleText('pageTitle');
+      expect(pageTitleText).to.be('Create template');
+
+      const stepTitle1 = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle1).to.be('Logistics');
+
+      // Fill out required fields
+      await testSubjects.setValue('nameField', 'test-index-template');
+      await testSubjects.setValue('indexPatternsField', 'test-index-pattern');
+
+      await testSubjects.click('indexModeField');
+      await testSubjects.click('index_mode_logsdb');
+
+      await testSubjects.click('formWizardStep-5');
+      expect(await testSubjects.exists('indexModeTitle')).to.be(true);
+      expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
+
+      // Click Create template
+      await pageObjects.indexManagement.clickNextButton();
+    });
+
     // https://github.com/elastic/kibana/pull/195174
     it('can preview index template that matches a_fake_index_pattern_that_wont_match_any_indices', async () => {
       // Click Create Template button
