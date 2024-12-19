@@ -13,8 +13,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
+  const es = getService('es');
 
-  const INDEX_TEMPLATE_NAME = `test-index-template`;
+  const INDEX_TEMPLATE_NAME = `create-test-index-template`;
 
   describe('Create index template', function () {
     before(async () => {
@@ -46,6 +47,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('nextButton');
 
       expect(await testSubjects.getVisibleText('lifecycleValue')).to.be('7 hours');
+
+      // Click Create template
+      await pageObjects.indexManagement.clickNextButton();
+      // Close detail tab
+      await testSubjects.click('closeDetailsButton');
+      await es.indices.deleteIndexTemplate({
+        name: INDEX_TEMPLATE_NAME,
+      });
+    });
+
+    it('can create a data stream with logsdb index mode', async () => {
+      await testSubjects.click('createTemplateButton');
+      // Fill out required fields
+      await testSubjects.setValue('nameField', INDEX_TEMPLATE_NAME);
+      await testSubjects.setValue('indexPatternsField', 'logsdb-test-index-pattern');
+
+      await testSubjects.click('indexModeField');
+      await testSubjects.click('index_mode_logsdb');
+
+      await testSubjects.click('formWizardStep-5');
+      expect(await testSubjects.exists('indexModeTitle')).to.be(true);
+      expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
+
+      // Click Create template
+      await pageObjects.indexManagement.clickNextButton();
+      // Close detail tab
+      await testSubjects.click('closeDetailsButton');
+      await es.indices.deleteIndexTemplate({
+        name: INDEX_TEMPLATE_NAME,
+      });
     });
   });
 };
