@@ -123,8 +123,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(stepTitle1).to.be('Logistics');
 
       // Fill out required fields
-      await testSubjects.setValue('nameField', 'test-index-template');
-      await testSubjects.setValue('indexPatternsField', 'test-index-pattern');
+      await testSubjects.setValue('nameField', 'logsdb-test-index-template');
+      await testSubjects.setValue('indexPatternsField', 'logsdb-test-index-pattern');
 
       await testSubjects.click('indexModeField');
       await testSubjects.click('index_mode_logsdb');
@@ -135,6 +135,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Click Create template
       await pageObjects.indexManagement.clickNextButton();
+
+      await testSubjects.click('closeDetailsButton');
     });
 
     // https://github.com/elastic/kibana/pull/195174
