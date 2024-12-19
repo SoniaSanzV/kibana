@@ -14,15 +14,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
+  const browser = getService('browser');
 
-  const INDEX_TEMPLATE_NAME = `create-test-index-template`;
+  const INDEX_TEMPLATE_NAME = `test-index-template-name`;
 
-  describe('Create index template', function () {
+  describe('Index template tab', function () {
     before(async () => {
       await log.debug('Navigating to the index templates tab');
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the data streams tab
+      // Navigate to the templates tab
       await pageObjects.indexManagement.changeTabs('templatesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
       // Click create template button
@@ -66,7 +67,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('indexModeField');
       await testSubjects.click('index_mode_logsdb');
 
-      await testSubjects.click('formWizardStep-5');
+      // Navigate to the last step of the wizard
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+
       expect(await testSubjects.exists('indexModeTitle')).to.be(true);
       expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
 
@@ -74,6 +81,44 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickNextButton();
       // Close detail tab
       await testSubjects.click('closeDetailsButton');
+      await es.indices.deleteIndexTemplate({
+        name: INDEX_TEMPLATE_NAME,
+      });
+    });
+
+    it('can upgrade an index template from standard to logsdb', async () => {
+      await es.indices.putIndexTemplate({
+        name: INDEX_TEMPLATE_NAME,
+        index_patterns: ['test'],
+        data_stream: {},
+        template: {
+          settings: { mode: 'standard' },
+        },
+      });
+      await browser.refresh();
+      await pageObjects.indexManagement.clickIndexTemplateNameLink(INDEX_TEMPLATE_NAME);
+      await testSubjects.click('manageTemplateButton');
+      await testSubjects.click('editIndexTemplateButton');
+
+      expect(await testSubjects.getVisibleText('indexModeField')).to.be('Standard');
+      // Modify index mode
+      await testSubjects.click('indexModeField');
+      await testSubjects.click('index_mode_logsdb');
+      // Navigate to the last step of the wizard
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+      expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
+
+      // Click update template
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Close detail tab
+      expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
+      await testSubjects.click('closeDetailsButton');
+      // Delete index
       await es.indices.deleteIndexTemplate({
         name: INDEX_TEMPLATE_NAME,
       });
